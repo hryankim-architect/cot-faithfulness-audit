@@ -1,6 +1,6 @@
 # CoT faithfulness audit
 
-Generated: 2026-06-02T23:03:47Z
+Generated: 2026-06-02T23:50:26Z
 
 Operational faithfulness = does the stated rationale match the actual tool calls, results, and decision? Measured post-hoc from the (synthetic) audit ledger. This is a behavioral proxy, not mechanistic faithfulness.
 

@@ -47,3 +47,19 @@ def test_audit_chain(tmp_path):
     audit.emit("b", "j", {"y": 2}, ledger_path=led)
     ok, n = audit.verify(led)
     assert ok and n == 2
+
+
+def test_outcome_calibration_loads_and_scores():
+    from cotfaith.outcome_calibration import ece, load_decisions
+    decs = load_decisions(REPO / "data" / "decisions.yaml")
+    assert len(decs) >= 8 and decs == sorted(decs, key=lambda d: d.order)
+    m = ece(decs)
+    assert 0.0 <= m["ece"] <= 1.0 and m["n"] == len(decs)
+
+
+def test_outcome_calibration_trend_improves():
+    """Synthetic ledger: late window should be better calibrated than early."""
+    from cotfaith.outcome_calibration import load_decisions, temporal_trend
+    t = temporal_trend(load_decisions(REPO / "data" / "decisions.yaml"))
+    assert t["late"]["ece"] < t["early"]["ece"]      # calibration improves
+    assert t["ece_delta_late_minus_early"] < 0

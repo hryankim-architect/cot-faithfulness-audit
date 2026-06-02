@@ -1,0 +1,38 @@
+# Synthetic decision ledger (clean-room) for the outcome-calibration monitor.
+# Each entry mimics one decision the substrate would log: the agent/critic's
+# stated confidence (0-1) and the later realized outcome (1 = the decision turned
+# out correct, 0 = incorrect). `order` is the arrival/time axis.
+#
+# Designed to exercise the monitor: the EARLY window is over-confident (high
+# confidence, ~chance outcomes); the LATE window is well-calibrated (confidence
+# tracks outcome) — i.e. calibration improves as decision-outcome experience
+# accumulates. The monitor should detect that trend. (Synthetic illustration.)
+version: "0.1"
+
+decisions:
+  # --- early window: over-confident ---
+  - {order: 1,  confidence: 0.95, correct: 0}
+  - {order: 2,  confidence: 0.90, correct: 1}
+  - {order: 3,  confidence: 0.92, correct: 0}
+  - {order: 4,  confidence: 0.88, correct: 1}
+  - {order: 5,  confidence: 0.95, correct: 1}
+  - {order: 6,  confidence: 0.90, correct: 0}
+  - {order: 7,  confidence: 0.93, correct: 1}
+  - {order: 8,  confidence: 0.85, correct: 0}
+  - {order: 9,  confidence: 0.95, correct: 1}
+  - {order: 10, confidence: 0.90, correct: 0}
+  - {order: 11, confidence: 0.92, correct: 0}
+  - {order: 12, confidence: 0.88, correct: 1}
+  # --- late window: well-calibrated (confidence ~ accuracy) ---
+  - {order: 13, confidence: 0.90, correct: 1}
+  - {order: 14, confidence: 0.60, correct: 1}
+  - {order: 15, confidence: 0.55, correct: 0}
+  - {order: 16, confidence: 0.85, correct: 1}
+  - {order: 17, confidence: 0.50, correct: 0}
+  - {order: 18, confidence: 0.80, correct: 1}
+  - {order: 19, confidence: 0.60, correct: 0}
+  - {order: 20, confidence: 0.90, correct: 1}
+  - {order: 21, confidence: 0.70, correct: 1}
+  - {order: 22, confidence: 0.55, correct: 1}
+  - {order: 23, confidence: 0.75, correct: 1}
+  - {order: 24, confidence: 0.50, correct: 0}

@@ -40,6 +40,22 @@ python scripts/run_faithfulness_audit.py      # writes audit/faithfulness_audit.
 pytest -q
 ```
 
+## Outcome-calibration monitor (v0.3)
+
+A second ledger-based oversight capability: is the agent/critic's stated
+**confidence calibrated against realized outcomes**, and does it improve as
+decision-outcome experience accumulates? `run_outcome_calibration.py` computes
+confidence-ECE + a reliability table over the (decision, outcome) ledger and
+splits early-vs-late by arrival order to show the trend.
+
+```bash
+python scripts/run_outcome_calibration.py     # writes audit/outcome_calibration.md
+```
+
+The realized outcome must be verified ground truth (never the agent's own later
+judgment) — a feedback-loop guard. Same theme as the faithfulness audit: *can we
+trust what the system says about itself, checked against the ledger?*
+
 ## Honest scope
 
 Operational not mechanistic; synthetic runs; the planted controls only prove the
