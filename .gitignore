@@ -1,0 +1,14 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+
+# macOS
+.DS_Store
+
+# Runtime audit ledger (the committed record is audit/*.md)
+audit/local-demo.ndjson
