@@ -25,9 +25,9 @@ Is the agent/critic's stated confidence calibrated against realized outcomes —
 | 0.8-0.9 | 9 | 0.88 | 0.67 |
 | 0.9-1.0 | 6 | 0.94 | 0.50 |
 
-## Honest scope
+## What this does not establish
 
-Synthetic decision-outcome ledger (clean-room); pure-Python confidence-ECE. The early-vs-late split is a single, small temporal comparison — illustrative of the monitor, not a powered claim. On the live substrate this consumes real (decision, outcome) pairs from the hash-chained ledger; the realized outcome must be a verified ground truth, never the agent's own later judgment (feedback-loop guard).
+Synthetic decision-outcome ledger (clean-room); pure-Python confidence-ECE. The early-vs-late split is a single, small temporal comparison — shows the monitor works, not a statistically powered claim. On a live substrate this consumes real (decision, outcome) pairs from the chained ledger; the realized outcome must be verified ground truth, never the agent's own later judgment (feedback-loop guard).
 
 ## Reproduce
 

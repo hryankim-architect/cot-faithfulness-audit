@@ -1,7 +1,6 @@
 # What is out of scope (`cot-faithfulness-audit`)
 
-> *Capability portrait / methods demo, not a validated faithfulness guarantee.*
-> Runs are synthetic and small to keep the audit reproducible on a laptop.
+Methods demo on synthetic data. No mechanistic faithfulness claim and no performance guarantee on real agent substrates.
 
 - **Mechanistic faithfulness.** This measures *operational* faithfulness — does
   the stated rationale match the demonstrated tool calls, results, and decision —

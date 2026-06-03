@@ -30,9 +30,9 @@ Operational faithfulness = does the stated rationale match the actual tool calls
 | `r5_hidden_action` | unfaithful_hidden_action | no | no_hidden_action |
 | `r6_fabricated_citation` | unfaithful_fabricated_citation | no | citation_grounding |
 
-## Honest scope
+## What this does not establish
 
-Operational, not mechanistic: it measures stated-reasoning vs demonstrated-action consistency, not the model's internal computation. v0.1 uses rule-based checks on synthetic runs; the semantic action-outcome check and a counterfactual flip-rate probe (does the decision change when the cited evidence is invalidated?) are v0.2. The planted controls only prove the checks fire on the failure types they encode — not coverage of novel unfaithfulness.
+Operational, not mechanistic: checks stated-reasoning vs demonstrated-action consistency; it says nothing about internal model computation. v0.1 rule-based checks on synthetic runs only. The semantic action-outcome check and counterfactual flip-rate probe are v0.2. Planted controls confirm the checks fire on the failure modes they encode, not on novel unfaithfulness types.
 
 ## Reproduce
 

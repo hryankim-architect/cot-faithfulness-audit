@@ -1,7 +1,7 @@
-"""Minimal hash-chained NDJSON audit ledger (mirrors the portfolio substrate).
+"""Append-only chained NDJSON ledger for audit entries (mirrors the portfolio substrate).
 
-The faithfulness audit writes its verdict here, so the oversight measurement is
-itself auditable — and any tampering with an earlier entry breaks the chain.
+The faithfulness audit writes its verdict here so the measurement is itself
+auditable. Tampering with any earlier entry breaks the hash chain.
 """
 from __future__ import annotations
 

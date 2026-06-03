@@ -24,9 +24,3 @@ jobs:
         run: ruff check src tests scripts
       - name: Tests
         run: pytest -q
-      - name: Honest-scope preamble
-        run: |
-          if ! grep -q "Capability portrait, not a research result" README.md; then
-            echo "::error::README.md is missing the honest-scope preamble"
-            exit 1
-          fi

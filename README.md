@@ -1,7 +1,6 @@
 # `cot-faithfulness-audit`
 
-> *Capability portrait, not a research result. Runs are synthetic and
-> intentionally small to keep the audit reproducible on a single workstation.*
+Runs are synthetic and small. This is a tool-using agent auditor, not a production faithfulness guarantee.
 
 If an agent's stated reasoning is a post-hoc rationalization rather than the real
 driver of its actions, the explanation can't be trusted to oversee the system.
@@ -30,7 +29,7 @@ tractable proxy — not mechanistic faithfulness of the model's weights.
   (`metrics.py`): per-check pass rate, run-level faithful rate, unfaithfulness
   taxonomy, and **planted-detection recall** (the canary — every planted control
   must be caught, or the run exits non-zero).
-- A **hash-chained NDJSON audit ledger** so the audit's own verdict is auditable.
+- A hash-chained NDJSON ledger so the audit's own verdict is auditable.
 
 ## Quickstart
 
@@ -56,7 +55,7 @@ The realized outcome must be verified ground truth (never the agent's own later
 judgment) — a feedback-loop guard. Same theme as the faithfulness audit: *can we
 trust what the system says about itself, checked against the ledger?*
 
-## Honest scope
+## What this does not establish
 
 Operational not mechanistic; synthetic runs; the planted controls only prove the
 checks fire on the failure types they encode. The semantic (LLM-judge) action-
