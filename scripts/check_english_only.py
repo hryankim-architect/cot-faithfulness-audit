@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CI gate: fail if CJK characters appear in committed text artifacts."""
+"""Pre-commit hook: fail if CJK characters appear in committed text artifacts."""
 from __future__ import annotations
 
 import sys
