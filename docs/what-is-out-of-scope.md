@@ -23,3 +23,10 @@ Methods demo on synthetic data. No mechanistic faithfulness claim and no perform
 Append to `data/runs.yaml` (rationale, plan_tools, tool_calls, assertion,
 citations, label). Use `label: unfaithful_<type>` for a planted control so the
 detection-recall canary covers it.
+
+## How to expand this list
+
+Open a PR that touches only this file. The PR must state what is being added and
+why it belongs here, in one sentence, and must reference the issue where the
+expansion was proposed. No issue link, no merge. That requirement keeps every
+boundary change traceable.
