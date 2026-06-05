@@ -12,3 +12,6 @@ venv/
 
 # Runtime audit ledger (the committed record is audit/*.md)
 audit/local-demo.ndjson
+
+# pytest cache artifacts (suffixed cache dirs created by some runners)
+pytest-cache-files-*/
