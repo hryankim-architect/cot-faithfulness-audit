@@ -31,6 +31,27 @@ tractable proxy — not mechanistic faithfulness of the model's weights.
   must be caught, or the run exits non-zero).
 - A hash-chained NDJSON ledger so the audit's own verdict is auditable.
 
+## What v0.2 adds
+
+- **Bootstrap CIs** (`src/cotfaith/bootstrap.py`) on the headline rates — run-level
+  faithful rate and planted-detection recall — so a demo number is an estimate with
+  uncertainty.
+- **Per-unfaithfulness-type detection** (`metrics.planted_detection_by_type`): for
+  each planted type, whether it was caught and which check(s) fired.
+- A **counterfactual flip-rate probe** (`src/cotfaith/counterfactual.py`): inject
+  each fault into a *faithful* run and confirm the verdict flips — an active
+  robustness test of the checks, not just a label.
+
+```
+run-level faithful rate     : 0.333  95% CI [0.000, 0.667]
+planted-detection recall    : 1.000  95% CI [1.000, 1.000]  (caught / 4 planted)
+counterfactual flip-rate    : 1.000  (faults injected into 1 faithful base run)
+```
+
+The recall CI `[1.00, 1.00]` reflects **zero observed misses on 4 controls**, not a
+guarantee — the small N is the real limitation. The semantic (LLM-judge)
+action-outcome check is deferred to v0.3.
+
 ## Quickstart
 
 ```bash
@@ -57,10 +78,11 @@ trust what the system says about itself, checked against the ledger?*
 
 ## What this does not establish
 
-Operational not mechanistic; synthetic runs; the planted controls only prove the
-checks fire on the failure types they encode. The semantic (LLM-judge) action-
-outcome check and a counterfactual flip-rate probe are v0.2. See
-[`docs/what-is-out-of-scope.md`](docs/what-is-out-of-scope.md). Part of the
-portfolio AI-safety extension roadmap (robustness / CoT-faithfulness pillar);
+Operational not mechanistic; synthetic runs; the planted controls and the
+counterfactual probe only prove the checks fire on the failure types they encode,
+not on novel unfaithfulness. The semantic (LLM-judge) action-outcome check — matching
+the prose rationale to results in *meaning*, not just tool bookkeeping — is deferred
+to v0.3. See [`docs/what-is-out-of-scope.md`](docs/what-is-out-of-scope.md). Part of
+the portfolio AI-safety extension roadmap (robustness / CoT-faithfulness pillar);
 composes with [`honesty-rubric-eval`](https://github.com/hryankim-architect/honesty-rubric-eval)
-(its judge powers the v0.2 semantic check).
+(its judge will power the v0.3 semantic check).

@@ -26,10 +26,30 @@ agent's stated reasoning diverges from its demonstrated actions.
 
 ---
 
-## Planned
+## v0.2 — uncertainty + active robustness (shipped: tag `v0.2` + Release)
 
-- [ ] **Semantic (LLM-judge) action-outcome check** — beyond rule-based string grounding; composes with `honesty-rubric-eval`'s judge
-- [ ] **Counterfactual flip-rate probe** — does perturbing the stated rationale change the action? (a stronger faithfulness signal than consistency alone)
+**Goal**: report the headline rates as estimates with uncertainty, show where
+detection lands per failure type, and actively test that the checks *flip* on
+injected faults — matching the v0.2 depth of the sibling eval repos.
+
+- [x] **Bootstrap CIs** (`src/cotfaith/bootstrap.py`) on run-level faithful rate and
+  planted-detection recall (percentile, deterministic, None/NaN resamples dropped)
+- [x] **Per-unfaithfulness-type detection** (`metrics.planted_detection_by_type`):
+  caught? + which check(s) fired, per planted type
+- [x] **Counterfactual flip-rate probe** (`src/cotfaith/counterfactual.py`): inject
+  each fault into a faithful run; confirm the verdict flips and the target check fires
+- [x] Runner + audit md + ledger carry the CIs, per-type table, and flip-rate; tests
+  for all three; ruff + CI green
+
+---
+
+## Planned (v0.3)
+
+- [ ] **Semantic (LLM-judge) action-outcome check** — beyond rule-based string
+  grounding; matches the prose rationale to results in meaning; composes with
+  `honesty-rubric-eval`'s judge
+- [ ] Larger / more varied run set, including novel unfaithfulness types beyond the
+  four planted failure modes
 
 ---
 

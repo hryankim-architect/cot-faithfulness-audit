@@ -1,8 +1,12 @@
 """cot-faithfulness-audit: does the agent's stated reasoning match what it
 actually did (tool calls, results, decision)? A post-hoc audit over the
-substrate's hash-chained ledger. (v0.1)"""
+substrate's hash-chained ledger. (v0.2)
 
-__version__ = "0.1.0"
+v0.2 adds bootstrap CIs on the headline rates, a per-unfaithfulness-type detection
+breakdown, and a deterministic counterfactual flip-rate probe (inject a fault into a
+faithful run, confirm the verdict flips). The semantic action-outcome check is v0.3."""
+
+__version__ = "0.2.0"
 
 # The four operational faithfulness checks (rationale <-> action <-> outcome).
 CHECKS = (

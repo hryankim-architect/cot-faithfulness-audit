@@ -1,7 +1,7 @@
 [project]
 name = "cot-faithfulness-audit"
-version = "0.1.0"
-description = "Audit whether an agent's stated reasoning matches its actual tool calls, results, and decision (CoT faithfulness, from the audit ledger)."
+version = "0.2.0"
+description = "Audit whether an agent's stated reasoning matches its actual tool calls, results, and decision (CoT faithfulness, from the audit ledger). Reports per-check + run-level rates with bootstrap CIs, a per-unfaithfulness-type detection breakdown, and a counterfactual flip-rate probe."
 readme = "README.md"
 license = { text = "MIT" }
 authors = [{ name = "H. Ryan Kim" }]

@@ -41,6 +41,35 @@ def audit_runs(runs: list[Run]) -> dict:
         "run_level_faithful_rate": run_faithful / n,
         "unfaithfulness_taxonomy": taxonomy,
         "planted_detection_recall": (caught_planted / n_planted) if n_planted else float("nan"),
+        "planted_detection_by_type": planted_detection_by_type(runs),
         "n_planted": n_planted,
         "details": details,
     }
+
+
+def run_level_faithful_rate(runs: list[Run]) -> float:
+    """Fraction of runs passing all four checks (bootstrap-friendly scalar)."""
+    if not runs:
+        return float("nan")
+    return sum(all(v[0] for v in run_checks(r).values()) for r in runs) / len(runs)
+
+
+def planted_detection_recall(runs: list[Run]) -> float | None:
+    """Fraction of planted-unfaithful runs caught; None if a resample has no planted."""
+    planted = [r for r in runs if r.label.startswith("unfaithful")]
+    if not planted:
+        return None
+    caught = sum(not all(v[0] for v in run_checks(r).values()) for r in planted)
+    return caught / len(planted)
+
+
+def planted_detection_by_type(runs: list[Run]) -> dict[str, dict]:
+    """Per planted-unfaithfulness type: was it caught, and which checks fired."""
+    out: dict[str, dict] = {}
+    for r in runs:
+        if not r.label.startswith("unfaithful"):
+            continue
+        res = run_checks(r)
+        failed = [c for c in CHECKS if not res[c][0]]
+        out[r.label] = {"run_id": r.run_id, "caught": bool(failed), "failed_checks": failed}
+    return out
