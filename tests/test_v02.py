@@ -8,7 +8,7 @@ REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO / "src"))
 
 from cotfaith import metrics  # noqa: E402
-from cotfaith.bootstrap import bootstrap_runs, percentile_ci  # noqa: E402
+from cotfaith.bootstrap import bootstrap_runs, clopper_pearson_ci, percentile_ci  # noqa: E402
 from cotfaith.counterfactual import INJECTIONS, counterfactual_flip  # noqa: E402
 from cotfaith.ledger import load_runs  # noqa: E402
 
@@ -25,14 +25,41 @@ def test_percentile_ci_empty_nan():
     assert lo != lo and hi != hi
 
 
-def test_bootstrap_recall_deterministic_and_perfect():
+def test_bootstrap_recall_degenerates_on_all_caught():
+    # The percentile bootstrap collapses to [1.00, 1.00] on an all-caught control
+    # set — which is exactly why the *report* uses Clopper-Pearson for recall (see
+    # test_clopper_pearson_* below). This test pins that degeneracy so the reason
+    # for switching is documented, not hidden.
     runs = load_runs(RUNS)
     a = bootstrap_runs(runs, metrics.planted_detection_recall, n_boot=300, seed=0)
     b = bootstrap_runs(runs, metrics.planted_detection_recall, n_boot=300, seed=0)
     assert a == b                                   # deterministic
     assert a["point"] == 1.0
-    assert a["ci_low"] == 1.0 and a["ci_high"] == 1.0  # zero observed misses
+    assert a["ci_low"] == 1.0 and a["ci_high"] == 1.0  # degenerate — uninformative
     assert a["n_boot"] > 0
+
+
+def test_clopper_pearson_informative_at_boundaries():
+    # 4/4 must NOT read as certainty: the exact interval reaches down to ~0.40.
+    lo, hi = clopper_pearson_ci(4, 4)
+    assert hi == 1.0
+    assert 0.36 < lo < 0.42                         # ~0.398, not 1.0
+    # 0/4 is the mirror image.
+    lo0, hi0 = clopper_pearson_ci(0, 4)
+    assert lo0 == 0.0
+    assert 0.55 < hi0 < 0.65                         # ~0.602
+
+
+def test_clopper_pearson_brackets_point_and_narrows_with_n():
+    # The interval brackets the point estimate and tightens as n grows.
+    lo, hi = clopper_pearson_ci(3, 4)               # 0.75
+    assert lo < 0.75 < hi
+    lo_small, hi_small = clopper_pearson_ci(4, 4)
+    lo_big, hi_big = clopper_pearson_ci(40, 40)
+    assert lo_big > lo_small                         # 40/40 far tighter than 4/4
+    import pytest
+    with pytest.raises(ValueError):
+        clopper_pearson_ci(5, 4)                     # k > n is invalid
 
 
 def test_bootstrap_faithful_rate_has_spread():

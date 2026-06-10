@@ -33,9 +33,11 @@ tractable proxy — not mechanistic faithfulness of the model's weights.
 
 ## What v0.2 adds
 
-- **Bootstrap CIs** (`src/cotfaith/bootstrap.py`) on the headline rates — run-level
-  faithful rate and planted-detection recall — so a demo number is an estimate with
-  uncertainty.
+- **Confidence intervals** (`src/cotfaith/bootstrap.py`) on the headline rates — a
+  percentile bootstrap for the run-level faithful rate, and the exact
+  **Clopper-Pearson** binomial interval for the canary metrics (planted-detection
+  recall, counterfactual flip-rate) so an all-caught control set reports an honest
+  `4/4 → [0.40, 1.00]` instead of a bootstrap that collapses to `[1.00, 1.00]`.
 - **Per-unfaithfulness-type detection** (`metrics.planted_detection_by_type`): for
   each planted type, whether it was caught and which check(s) fired.
 - A **counterfactual flip-rate probe** (`src/cotfaith/counterfactual.py`): inject
@@ -44,13 +46,16 @@ tractable proxy — not mechanistic faithfulness of the model's weights.
 
 ```
 run-level faithful rate     : 0.333  95% CI [0.000, 0.667]
-planted-detection recall    : 1.000  95% CI [1.000, 1.000]  (caught / 4 planted)
-counterfactual flip-rate    : 1.000  (faults injected into 1 faithful base run)
+planted-detection recall    : 1.000  95% CI [0.398, 1.000] (Clopper-Pearson, 4/4 planted)
+counterfactual flip-rate    : 1.000  95% CI [0.398, 1.000] (Clopper-Pearson, 4/4); injected into 1 faithful base run
 ```
 
-The recall CI `[1.00, 1.00]` reflects **zero observed misses on 4 controls**, not a
-guarantee — the small N is the real limitation. The semantic (LLM-judge)
-action-outcome check is deferred to v0.3.
+The two **canary** metrics (recall, flip-rate) report an exact **Clopper-Pearson**
+binomial CI rather than a percentile bootstrap: a bootstrap on an all-caught set
+collapses to `[1.00, 1.00]`, which reads as certainty, whereas `4/4 → [0.40, 1.00]`
+is honest that a tiny perfect run is consistent with a true rate as low as ~0.40.
+The point is that the method **catches the faults it encodes**, not a benchmarked
+detection rate. The semantic (LLM-judge) action-outcome check is deferred to v0.3.
 
 ## Quickstart
 

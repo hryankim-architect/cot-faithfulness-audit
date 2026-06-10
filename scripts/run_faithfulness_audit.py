@@ -17,7 +17,7 @@ REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO / "src"))
 
 from cotfaith import CHECKS, audit, metrics  # noqa: E402
-from cotfaith.bootstrap import bootstrap_runs  # noqa: E402
+from cotfaith.bootstrap import bootstrap_runs, clopper_pearson_ci  # noqa: E402
 from cotfaith.counterfactual import counterfactual_flip  # noqa: E402
 from cotfaith.ledger import load_runs  # noqa: E402
 
@@ -30,12 +30,27 @@ def _ci(d: dict) -> str:
     return "[n/a]" if lo is None else f"[{lo:.3f}, {hi:.3f}]"
 
 
+def _cit(t: tuple[float, float]) -> str:
+    lo, hi = t
+    return "[n/a]" if lo is None or lo != lo else f"[{lo:.3f}, {hi:.3f}]"
+
+
 def main() -> int:
     runs = load_runs(REPO / "data" / "runs.yaml")
     m = metrics.audit_runs(runs)
     faith_ci = bootstrap_runs(runs, metrics.run_level_faithful_rate, n_boot=2000, seed=0)
-    recall_ci = bootstrap_runs(runs, metrics.planted_detection_recall, n_boot=2000, seed=0)
     flip = counterfactual_flip(runs)
+    # The binomial "canary" metrics (planted-detection recall, counterfactual
+    # flip-rate) use the exact Clopper-Pearson interval, NOT a percentile bootstrap:
+    # on an all-caught control set the bootstrap collapses to [1.00, 1.00], which
+    # reads as certainty, whereas Clopper-Pearson reports 4/4 as ~[0.40, 1.00] —
+    # honest about how few trials there are.
+    n_planted = m["n_planted"]
+    caught = round(m["planted_detection_recall"] * n_planted) if n_planted else 0
+    recall_ci = clopper_pearson_ci(caught, n_planted) if n_planted else (float("nan"), float("nan"))
+    flip_total = sum(pf["n_bases"] for pf in flip["per_fault"].values())
+    flip_flipped = round(flip["flip_rate"] * flip_total) if flip_total else 0
+    flip_ci = clopper_pearson_ci(flip_flipped, flip_total) if flip_total else (float("nan"), float("nan"))
     print(f"=== CoT faithfulness audit (n_runs={m['n_runs']}, "
           f"planted unfaithful={m['n_planted']}) ===")
     for d in m["details"]:
@@ -48,12 +63,13 @@ def main() -> int:
     print(f"\n  run-level faithful rate     : {m['run_level_faithful_rate']:.3f}  "
           f"95% CI {_ci(faith_ci)}")
     print(f"  planted-detection recall    : {m['planted_detection_recall']:.3f}  "
-          f"95% CI {_ci(recall_ci)}  (caught / {m['n_planted']} planted)")
+          f"95% CI {_cit(recall_ci)} (Clopper-Pearson, {caught}/{n_planted} planted)")
     print("  planted detection by type:")
     for label, info in m["planted_detection_by_type"].items():
         print(f"    {label:34s} caught={str(info['caught']):5s} via {','.join(info['failed_checks'])}")
     print(f"  counterfactual flip-rate    : {flip['flip_rate']:.3f}  "
-          f"(faults injected into {flip['n_bases']} faithful base run(s); 1.00 = all caught)")
+          f"95% CI {_cit(flip_ci)} (Clopper-Pearson, {flip_flipped}/{flip_total}); "
+          f"injected into {flip['n_bases']} faithful base run(s)")
 
     AUDIT.mkdir(exist_ok=True)
     ts = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")  # noqa: UP017
@@ -83,12 +99,15 @@ def main() -> int:
         f"- **Run-level faithful rate:** {m['run_level_faithful_rate']:.3f} "
         f"(95% CI {_ci(faith_ci)}, n_boot={faith_ci['n_boot']})\n"
         f"- **Planted-detection recall:** {m['planted_detection_recall']:.3f} "
-        f"(95% CI {_ci(recall_ci)}, n_boot={recall_ci['n_boot']}) — every "
-        "deliberately-unfaithful control should be caught (the canary principle). On a "
-        "tiny control set a [1.00, 1.00] CI reflects zero observed misses, not a guarantee.\n"
-        f"- **Counterfactual flip-rate:** {flip['flip_rate']:.3f} — faults injected into "
-        f"{flip['n_bases']} faithful base run(s); 1.00 means every injected fault flips the "
-        "verdict (an active robustness test, not just a label).\n"
+        f"(95% CI {_cit(recall_ci)}, Clopper-Pearson, {caught}/{n_planted}) — every "
+        "deliberately-unfaithful control should be caught (the canary principle). The exact "
+        "binomial CI is wide because the control set is tiny: 4/4 is consistent with a true "
+        "recall as low as ~0.40, so this shows the method catches the encoded faults, not a "
+        "benchmarked detection rate.\n"
+        f"- **Counterfactual flip-rate:** {flip['flip_rate']:.3f} "
+        f"(95% CI {_cit(flip_ci)}, Clopper-Pearson, {flip_flipped}/{flip_total}) — faults "
+        f"injected into {flip['n_bases']} faithful base run(s); 1.00 means every injected "
+        "fault flips the verdict (an active robustness test, not just a label).\n"
         f"- Unfaithfulness taxonomy: {tax}\n\n"
         "## Planted detection by type\n\n| Unfaithfulness type | Caught | Via check(s) |\n"
         "|---|---|---|\n" + by_type_tbl + "\n\n"
@@ -114,8 +133,10 @@ def main() -> int:
         "run_level_faithful_rate": m["run_level_faithful_rate"],
         "run_faithful_ci": [faith_ci["ci_low"], faith_ci["ci_high"]],
         "planted_detection_recall": m["planted_detection_recall"],
-        "recall_ci": [recall_ci["ci_low"], recall_ci["ci_high"]],
+        "recall_ci": [recall_ci[0], recall_ci[1]],
+        "recall_ci_method": "clopper_pearson",
         "counterfactual_flip_rate": flip["flip_rate"],
+        "flip_ci": [flip_ci[0], flip_ci[1]],
     }, ledger_path=AUDIT / "local-demo.ndjson")
     ok, n = audit.verify(AUDIT / "local-demo.ndjson")
     print(f"  audit chain: {'OK' if ok else 'BROKEN'} ({n} entries)")
